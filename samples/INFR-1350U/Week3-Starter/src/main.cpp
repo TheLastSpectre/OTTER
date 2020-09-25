@@ -19,6 +19,11 @@
 
 #define LOG_GL_NOTIFICATIONS
 
+void GlfwWindowResizedCallback(GLFWwindow* window, int width, int height) 
+{ 
+	glViewport(0, 0, width, height); 
+}
+
 /*
 	Handles debug messages from OpenGL
 	https://www.khronos.org/opengl/wiki/Debug_Output#Message_Components
@@ -62,6 +67,9 @@ bool initGLFW() {
 	//Create a new GLFW window
 	window = glfwCreateWindow(800, 800, "INFR1350U", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
+
+	// Set our window resized callback   
+	glfwSetWindowSizeCallback(window, GlfwWindowResizedCallback);
 
 	return true;
 }
