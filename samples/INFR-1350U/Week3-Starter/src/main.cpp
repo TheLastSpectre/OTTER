@@ -156,6 +156,33 @@ int main() {
 		0.0f, 0.0f, 1.0f
 	};
 
+	static const float interleaved[] = 
+	{
+		//X     Y      Z      R     G     B
+		0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.0f,
+		0.5f,  0.5f, 0.5f,  0.3f, 0.2f, 0.5f,
+		-0.5f,  0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 
+		0.5f,  0.5f, 0.5f,  1.0f, 1.0f, 1.0f    
+	};    
+	
+	VertexBuffer* interleaved_vbo = new VertexBuffer();    
+	interleaved_vbo->LoadData(interleaved, 6 * 4);
+
+	static const uint16_t indices[] = 
+	{
+		0, 1, 2,
+		1, 3, 2 
+	};    
+
+	IndexBuffer* interleaved_ibo = new IndexBuffer();    
+	interleaved_ibo->LoadData(indices, 3 * 2);
+
+	size_t stride = sizeof(float) * 6;    
+	VertexArrayObject* vao2 = new VertexArrayObject();    
+	vao2->AddVertexBuffer(interleaved_vbo, { BufferAttribute(0, 3, GL_FLOAT, false, stride, 0), BufferAttribute(1, 3, GL_FLOAT, false, stride, sizeof(float) * 3), });    
+	vao2->SetIndexBuffer(interleaved_ibo);
+
+
 	VertexBuffer* posVbo = new VertexBuffer();    
 	posVbo->LoadData(points, 9);    
 	VertexBuffer* color_vbo = new VertexBuffer();    
@@ -165,12 +192,18 @@ int main() {
 	vao->AddVertexBuffer(posVbo, { { 0, 3, GL_FLOAT, false, 0, NULL } });
 	vao->AddVertexBuffer(color_vbo, { { 1, 3, GL_FLOAT, false, 0, NULL } });
 
+
 	// Load our shaders
 
 	Shader* shader = new Shader();
 	shader->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
 	shader->LoadShaderPartFromFile("shaders/frag_shader.glsl", GL_FRAGMENT_SHADER);
 	shader->Link();
+
+	Shader* shader2 = new Shader();
+	shader2->LoadShaderPartFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
+	shader2->LoadShaderPartFromFile("shaders/frag_shadernt.glsl", GL_FRAGMENT_SHADER);
+	shader2->Link();
 
 	// GL states
 	glEnable(GL_DEPTH_TEST);
@@ -195,6 +228,9 @@ int main() {
 		vao->Bind();
 		
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+		vao2->Bind();
+		shader2->Bind();
+		glDrawElements(GL_TRIANGLES, interleaved_ibo->GetElementCount(), interleaved_ibo->GetElementType(), nullptr);vao->UnBind();
 
 		glfwSwapBuffers(window);
 	}
